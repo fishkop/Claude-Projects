@@ -1,0 +1,20 @@
+PostgreSQL: 
+
+ich brauche neue database mit Namen 'helloKitty' !
+brauche noch zwei user für diese DB und einem der nur lesend darauf zugreifen kann. 
+Die user können auch über access Gruppen angelegt werden. 
+
+die tabelle soll den Namen "MeineKitties" haben.
+eindeutige Nummer beginnend mit 3000 und sich immer um zehn erhöhend.
+Name der Katze muss immer vorhanden sein und darf nur einmal vorkommen.
+geburtsdatum muss im Format TTMMJJ sein
+rasse
+mänlich, weiblich, divers
+farbe
+wert
+
+
+bitte erstelle ein bash-script das die Kommandos alle ausführt und 10 test-datensätze als Beispiel hinzufügt
+
+bitte teste das script mit der Datenbank
+
