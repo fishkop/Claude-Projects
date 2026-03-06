@@ -1,0 +1,26 @@
+
+-- Connection storm is best simulated from client side (many concurrent connections).
+
+-- Observations:
+
+SELECT state, count(*) FROM pg_stat_activity GROUP BY state ORDER BY 2 DESC;
+
+-- Identify idle in transaction:
+SELECT pid, usename, state, now()-xact_start AS xact_age, left(query,120)
+FROM pg_stat_activity
+WHERE state='idle in transaction'
+ORDER BY xact_start;
+
+-- Stabilization candidates (apply per DB/session as policy allows):
+-- ALTER DATABASE <db> SET statement_timeout = '5s';
+-- ALTER ROLE <role> SET statement_timeout = '5s';
+
+
+
+
+### Request: create a simulation program which makes a connection storm via tcp
+### write it in standard C-Code whit command line input and output
+
+Explain the commands and the porgresql commands
+
+if it good and finish, we will upload to fishkop repo.
