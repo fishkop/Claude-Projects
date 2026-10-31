@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>It's Polo Time – Chiemsee Polo &amp; Country Park</title>
+<style>
+  @font-face { font-family: "Anton"; src: url("fonts/Anton.ttf"); }
+  @font-face { font-family: "Kaushan"; src: url("fonts/Kaushan.ttf"); }
+  @font-face { font-family: "Cinzel"; src: url("fonts/Cinzel.ttf"); font-weight: 400 900; }
+  @font-face { font-family: "PlayfairI"; src: url("fonts/PlayfairItalic.ttf"); font-weight: 400 900; }
+
+  :root {
+    --red: #fc2b00; --navy: #14213d; --cream: #f8f3e8; --gold: #b3803f; --ink: #121212;
+  }
+  html, body { margin: 0; background: #000; }
+  body.preview { display: grid; place-items: center; min-height: 100vh; }
+  #stage {
+    position: relative; width: 1080px; height: 1080px; overflow: hidden;
+    background: var(--red); font-synthesis: none;
+  }
+  #world { position: absolute; inset: 0; }
+  canvas { position: absolute; inset: 0; width: 1080px; height: 1080px; }
+  .layer { position: absolute; inset: 0; pointer-events: none; }
+  .scene { position: absolute; inset: 0; display: none; }
+  .abs { position: absolute; left: 0; top: 0; transform-origin: 50% 50%; will-change: transform, opacity; white-space: nowrap; }
+  /* Positionierung erfolgt komplett per transform in place() */
+
+  .anton { font-family: "Anton"; line-height: 0.9; text-transform: uppercase; }
+  .script { font-family: "Kaushan"; line-height: 1; }
+  .cinzel { font-family: "Cinzel"; }
+  .playfair { font-family: "PlayfairI"; font-style: italic; }
+
+  /* Szene 1 */
+  .s1-its { font-size: 170px; color: var(--cream); -webkit-text-stroke: 5px var(--ink); paint-order: stroke fill; }
+  .s1-big { font-size: 360px; color: var(--cream); letter-spacing: 6px;
+            text-shadow: 10px 10px 0 var(--ink); -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill; }
+  .s1-sub { font-size: 46px; color: var(--cream); letter-spacing: 14px; font-weight: 600; }
+  .s1-sub2 { font-size: 26px; color: var(--cream); letter-spacing: 6px; }
+
+  /* Szene 2 */
+  .s2-head { font-size: 70px; color: var(--navy); }
+  .s2-word { font-size: 205px; color: var(--red); letter-spacing: 4px;
+             -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill; text-shadow: 8px 8px 0 rgba(20,33,61,.9); }
+  #rider { width: 770px; }
+
+  /* Szene 3 */
+  #lake { width: 1080px; }
+  .s3-shade { position: absolute; left: 0; right: 0; bottom: 0; height: 430px;
+              background: linear-gradient(to bottom, rgba(248,243,232,0) 0%, rgba(248,243,232,.88) 45%, rgba(248,243,232,1) 75%); }
+  .s3-a { font-size: 104px; color: var(--navy); }
+  .s3-b { font-size: 132px; color: var(--navy); }
+
+  /* Szene 4 */
+  .s4-a { font-size: 180px; color: var(--cream); letter-spacing: 4px; }
+  .s4-b { font-size: 180px; color: var(--red); letter-spacing: 4px; text-shadow: 8px 8px 0 #0a1124; }
+  .s4-c { font-size: 66px; color: #e2b36f; }
+
+  /* Szene 5 */
+  .s5-a { font-size: 150px; color: var(--cream); text-shadow: 5px 5px 0 rgba(0,0,0,.25); }
+  .s5-b { font-size: 84px; color: var(--cream); text-shadow: 4px 4px 0 rgba(0,0,0,.25); }
+  .s5-c { font-size: 34px; color: var(--navy); letter-spacing: 8px; font-weight: 700; }
+
+  /* Szene 6 */
+  #logo { width: 600px; border-radius: 40px; box-shadow: 0 30px 60px rgba(20,33,61,.35); }
+  .s6-a { font-size: 88px; color: var(--red); }
+  .s6-b { font-size: 30px; color: var(--navy); letter-spacing: 7px; font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="world">
+    <canvas id="bg" width="1080" height="1080"></canvas>
+
+    <!-- 1 · It's POLO TIME -->
+    <div class="scene" id="s1">
+      <div class="abs center script s1-its" id="s1-its">It's</div>
+      <div class="abs center anton s1-big" id="s1-polo">Polo</div>
+      <div class="abs center anton s1-big" id="s1-time">Time</div>
+      <div class="abs center cinzel s1-sub" id="s1-sub">CHIEMSEE</div>
+      <div class="abs center cinzel s1-sub2" id="s1-sub2">— Polo &amp; Country Park —</div>
+    </div>
+
+    <!-- 2 · Was Polo in dir weckt -->
+    <div class="scene" id="s2">
+      <div class="abs center script s2-head" id="s2-head">Was Polo in dir weckt:</div>
+      <div class="abs center anton s2-word" id="s2-w0">Tempo</div>
+      <div class="abs center anton s2-word" id="s2-w1">Teamgeist</div>
+      <div class="abs center anton s2-word" id="s2-w2">Adrenalin</div>
+      <img class="abs" id="rider" src="assets/rider-cutout.png" alt="">
+    </div>
+
+    <!-- 3 · Wir suchen neue Polo-Spieler -->
+    <div class="scene" id="s3">
+      <img class="abs" id="lake" src="assets/scene-lake.png" alt="">
+      <div class="s3-shade"></div>
+      <div class="abs center script s3-a" id="s3-a">Wir suchen neue</div>
+      <div class="abs center script s3-b" id="s3-b">Polo-Spieler!</div>
+    </div>
+
+    <!-- 4 · Einsteiger willkommen -->
+    <div class="scene" id="s4">
+      <div class="abs center anton s4-a" id="s4-a">Einsteiger</div>
+      <div class="abs center anton s4-b" id="s4-b">Willkommen</div>
+      <div class="abs center playfair s4-c" id="s4-c">– auch ohne Reiterfahrung –</div>
+    </div>
+
+    <!-- 5 · Suchtgefahr -->
+    <div class="scene" id="s5">
+      <div class="abs center script s5-a" id="s5-a">Achtung,</div>
+      <div class="abs center script s5-b" id="s5-b">es besteht Suchtgefahr!</div>
+      <div class="abs center cinzel s5-c" id="s5-c">ATEMBERAUBENDER SPORT.</div>
+    </div>
+
+    <!-- 6 · Endcard -->
+    <div class="scene" id="s6">
+      <img class="abs" id="logo" src="assets/logo-red.png" alt="">
+      <div class="abs center script s6-a" id="s6-a">Werde Teil des Teams!</div>
+      <div class="abs center cinzel s6-b" id="s6-b">CHIEMSEE · POLO &amp; COUNTRY PARK</div>
+    </div>
+
+    <canvas id="fx" width="1080" height="1080"></canvas>
+  </div>
+  <canvas id="wipe" width="1080" height="1080"></canvas>
+</div>
+
+<script>
+"use strict";
+// ---------------------------------------------------------------- Konstanten
+const W = 1080, H = 1080, DURATION = 10, FPS = 30;
+const C = { red: "#fc2b00", navy: "#14213d", cream: "#f8f3e8", gold: "#b3803f", ink: "#121212" };
+
+// Szenenwechsel (Sekunden) – an diesen Zeitpunkten liegt eine Wischblende
+const CUTS = [2.1, 4.3, 6.4, 7.8, 8.8];
+const SCENES = [
+  { id: "s1", from: 0.0, to: 2.1, bg: C.red },
+  { id: "s2", from: 2.1, to: 4.3, bg: C.cream },
+  { id: "s3", from: 4.3, to: 6.4, bg: C.cream },
+  { id: "s4", from: 6.4, to: 7.8, bg: C.navy },
+  { id: "s5", from: 7.8, to: 8.8, bg: C.cream },
+  { id: "s6", from: 8.8, to: 10.01, bg: C.cream },
+];
+
+// "Einschlag"-Zeitpunkte: Kamera-Shake im Bild und Drum-Hits in der Tonspur
+const SLAMS = [
+  { t: 0.55, k: 1.0 }, { t: 0.85, k: 1.0 },
+  { t: 2.45, k: 0.6 }, { t: 3.05, k: 0.6 }, { t: 3.65, k: 0.7 },
+  { t: 6.55, k: 0.8 }, { t: 6.8, k: 0.8 },
+  { t: 7.98, k: 0.5 },
+  { t: 9.12, k: 1.0 },
+];
+// Fuer die Tonspur exportiert (scripts/render.js schreibt das nach build/sfx.json)
+window.SFX = { duration: DURATION, cuts: CUTS, slams: SLAMS, ballHit: 0.12,
+               gallop: [[2.1, 4.3, 1.0], [4.3, 6.4, 0.55]] };
+
+// ---------------------------------------------------------------- Helfer
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOutCubic = p => 1 - Math.pow(1 - p, 3);
+const easeInCubic = p => p * p * p;
+const easeInOutCubic = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const easeOutExpo = p => p >= 1 ? 1 : 1 - Math.pow(2, -10 * p);
+const easeOutBack = (p, s = 1.9) => 1 + (s + 1) * Math.pow(p - 1, 3) + s * Math.pow(p - 1, 2);
+
+function rng(seed) { // Mulberry32 – deterministisch, damit jedes Frame reproduzierbar ist
+  return function () {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+const $ = id => document.getElementById(id);
+function place(el, { x = 0, y = 0, s = 1, r = 0, o = 1, sx = 1, blur = 0, center = true }) {
+  const c = center ? "translate(-50%,-50%) " : "";
+  el.style.transform = `translate(${x}px,${y}px) ${c}rotate(${r}deg) scale(${s * sx},${s})`;
+  el.style.opacity = o;
+  el.style.filter = blur > 0.3 ? `blur(${blur}px)` : "none";
+}
+// Text "einschlagen" lassen: gross -> 1 mit Ueberschwinger
+function slam(el, t, t0, { x = 0, y = 0, r = 0, from = 2.4, dur = 0.26, out = null, outDur = 0.18, dx = 0 } = {}) {
+  const p = prog(t, t0, t0 + dur);
+  let s = p <= 0 ? from : lerp(from, 1, easeOutBack(p, 1.4));
+  let o = p <= 0 ? 0 : clamp(p * 4);
+  let blur = (1 - p) * 10;
+  let ox = 0;
+  if (out !== null && t > out) {
+    const q = easeInCubic(prog(t, out, out + outDur));
+    o *= 1 - q; s *= 1 + q * 0.25; ox = dx * q; blur += q * 12;
+  }
+  place(el, { x: x + ox, y, r, s, o, blur });
+}
+function fadeUp(el, t, t0, { x = 0, y = 0, r = 0, dist = 40, dur = 0.4 } = {}) {
+  const p = easeOutCubic(prog(t, t0, t0 + dur));
+  place(el, { x, y: y + (1 - p) * dist, r, o: p });
+}
+function shake(t) {
+  let a = 0;
+  for (const s of SLAMS) if (t >= s.t) a += 22 * s.k * Math.exp(-(t - s.t) * 11);
+  return { x: a * Math.sin(t * 91), y: a * Math.cos(t * 77), r: a * 0.03 * Math.sin(t * 53) };
+}
+
+// ---------------------------------------------------------------- Canvas-Elemente
+const bg = $("bg").getContext("2d"), fx = $("fx").getContext("2d"), wp = $("wipe").getContext("2d");
+
+// Handgezeichnete "Tempo-Striche" wie im Logo (kurze, schraege Pinselstriche)
+const TICKS = (() => {
+  const r = rng(7), out = [];
+  for (let i = 0; i < 70; i++) out.push({
+    x: r() * W, y: r() * H, len: 40 + r() * 70, a: -1.15 + (r() - .5) * .5,
+    w: 3 + r() * 5, ph: r() * 6.28, cream: r() < .35, sp: 0.6 + r() * 0.8,
+  });
+  return out;
+})();
+function drawTicks(ctx, t, colA, colB, alpha = 1, drift = 0) {
+  ctx.save(); ctx.lineCap = "round";
+  for (const k of TICKS) {
+    const flick = 0.5 + 0.5 * Math.sin(t * 9 * k.sp + k.ph);
+    const len = k.len * (0.55 + 0.45 * flick);
+    let x = (k.x - drift * k.sp * t * 400) % (W + 200); if (x < -100) x += W + 200;
+    ctx.globalAlpha = alpha * (0.45 + 0.55 * flick);
+    ctx.strokeStyle = k.cream ? colB : colA;
+    ctx.lineWidth = k.w;
+    ctx.beginPath();
+    ctx.moveTo(x, k.y);
+    ctx.quadraticCurveTo(x + Math.cos(k.a) * len * .5 + 4, k.y + Math.sin(k.a) * len * .5,
+                         x + Math.cos(k.a) * len, k.y + Math.sin(k.a) * len);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+// Horizontale Speed-Lines
+const LINES = (() => { const r = rng(11), o = []; for (let i = 0; i < 26; i++) o.push({ y: r() * H, len: 120 + r() * 380, sp: 1400 + r() * 1800, off: r() * 3000, w: 2 + r() * 5 }); return o; })();
+function drawSpeedLines(ctx, t, col, alpha, dir = -1) {
+  ctx.save(); ctx.strokeStyle = col; ctx.lineCap = "round";
+  for (const l of LINES) {
+    const span = W + l.len + 400;
+    let x = ((l.off + t * l.sp) % span) - l.len - 200;
+    if (dir < 0) x = W - x;
+    ctx.globalAlpha = alpha; ctx.lineWidth = l.w;
+    ctx.beginPath(); ctx.moveTo(x, l.y); ctx.lineTo(x + dir * -l.len, l.y); ctx.stroke();
+  }
+  ctx.restore();
+}
+// Polo-Ball mit Naht
+function drawBall(ctx, x, y, r, rot) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+  ctx.fillStyle = C.cream; ctx.strokeStyle = C.ink; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.setLineDash([7, 8]); ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(0, 0, r * .62, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
+// Staub hinter den Hufen
+const DUST = (() => { const r = rng(23), o = []; for (let i = 0; i < 120; i++) o.push({ t0: r() * 2.4, vx: -(200 + r() * 650), vy: -(40 + r() * 260), sz: 3 + r() * 12, ox: r() * 380, gold: r() < .7 }); return o; })();
+function drawDust(ctx, t, baseX, baseY, alpha) {
+  ctx.save();
+  for (const d of DUST) {
+    const age = ((t - d.t0) % 0.9 + 0.9) % 0.9;
+    const x = baseX + d.ox + d.vx * age, y = baseY + d.vy * age + 380 * age * age;
+    ctx.globalAlpha = alpha * (1 - age / 0.9);
+    ctx.fillStyle = d.gold ? C.gold : "#8a5a2b";
+    ctx.beginPath(); ctx.ellipse(x, y, d.sz, d.sz * .6, -.4, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+// Rauer Pinselstrich (aus vielen leicht versetzten Linien), von links nach rechts aufgedeckt
+const BRUSH = (() => { const r = rng(99), o = []; for (let i = 0; i < 46; i++) o.push({ dy: (r() - .5) * 230, w: 6 + r() * 26, a: .55 + r() * .45, j: r() * 6.28, st: r() * .12, en: .86 + r() * .14 }); return o; })();
+function drawBrush(ctx, p, cx, cy, len, ang, col, thick = 1) {
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang); ctx.strokeStyle = col; ctx.lineCap = "round";
+  for (const b of BRUSH) {
+    const x0 = -len / 2 + b.st * len, x1 = lerp(x0, -len / 2 + b.en * len, clamp(p * 1.15 - b.st));
+    if (x1 <= x0) continue;
+    const dy = b.dy * thick;
+    ctx.globalAlpha = b.a; ctx.lineWidth = Math.max(2, b.w * Math.sqrt(thick));
+    ctx.beginPath(); ctx.moveTo(x0, dy);
+    for (let x = x0; x <= x1; x += 24) ctx.lineTo(x, dy + Math.sin(x * .013 + b.j) * 9 * thick);
+    ctx.lineTo(x1, dy); ctx.stroke();
+  }
+  ctx.restore();
+}
+// Sonnenstrahlen fuer die Endcard
+function drawRays(ctx, t, col, alpha) {
+  ctx.save(); ctx.translate(W / 2, 400); ctx.rotate(t * .25); ctx.fillStyle = col; ctx.globalAlpha = alpha;
+  for (let i = 0; i < 18; i++) {
+    ctx.rotate(Math.PI * 2 / 18);
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-70, -1100); ctx.lineTo(70, -1100); ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+}
+// Diagonale Wischblende (zwei Farbbaender), Szene wechselt bei voller Abdeckung
+function drawWipe(ctx, t) {
+  ctx.clearRect(0, 0, W, H);
+  const d = 0.17;
+  CUTS.forEach((tc, i) => {
+    if (t < tc - d || t > tc + d) return;
+    const p = (t - (tc - d)) / (2 * d);
+    const cols = [[C.navy, C.cream], [C.red, C.navy], [C.red, C.cream], [C.cream, C.red], [C.navy, C.red]][i];
+    cols.forEach((col, j) => {
+      const pp = clamp(p * 1.0 + (j ? -0.06 : 0.06) * (p < .5 ? 1 : -1));
+      const lead = lerp(-500, W + 500, easeInOutCubic(clamp(pp * 2)));
+      const trail = lerp(-500, W + 500, easeInOutCubic(clamp(pp * 2 - 1)));
+      const sk = 380;
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.moveTo(trail, 0); ctx.lineTo(lead + sk, 0); ctx.lineTo(lead, H); ctx.lineTo(trail - sk, H);
+      ctx.closePath(); ctx.fill();
+    });
+  });
+}
+
+// ---------------------------------------------------------------- Szenen
+function scene1(t) {
+  bg.fillStyle = C.red; bg.fillRect(0, 0, W, H);
+  drawSpeedLines(bg, t, "rgba(255,255,255,.18)", 1);
+  drawTicks(bg, t, C.ink, C.cream, prog(t, 0.0, 0.3));
+
+  const zoom = 1 + 0.05 * easeInOutCubic(prog(t, 0.9, 2.1));
+  slam($("s1-its"), t, 0.32, { x: W / 2 - 245, y: 190, r: -9, from: 0.2, dur: 0.22 });
+  slam($("s1-polo"), t, 0.55, { x: W / 2 + 5, y: 395 * zoom, r: -4, from: 3.2 });
+  slam($("s1-time"), t, 0.85, { x: W / 2 + 20, y: 705 * zoom, r: -4, from: 3.2 });
+  fadeUp($("s1-sub"), t, 1.15, { x: W / 2, y: 960, dist: 30 });
+  fadeUp($("s1-sub2"), t, 1.3, { x: W / 2, y: 1012, dist: 30 });
+
+  // Ball wird zu Beginn quer durchs Bild geschlagen
+  fx.clearRect(0, 0, W, H);
+  const pb = prog(t, 0.12, 0.62);
+  if (pb > 0 && pb < 1) {
+    const e = easeOutCubic(pb);
+    const x = lerp(-80, W + 120, e), y = 560 - Math.sin(e * Math.PI) * 330;
+    for (let i = 4; i >= 1; i--) { // Bewegungsunschaerfe
+      fx.globalAlpha = 0.12 * (5 - i);
+      const e2 = easeOutCubic(clamp(pb - i * 0.025));
+      drawBall(fx, lerp(-80, W + 120, e2), 560 - Math.sin(e2 * Math.PI) * 330, 44, e2 * 18);
+    }
+    fx.globalAlpha = 1; drawBall(fx, x, y, 44, e * 18);
+  }
+  // Aufprall-Blitz bei POLO
+  const fl = Math.exp(-(t - 0.55) * 14) * (t > 0.55 ? 1 : 0) + Math.exp(-(t - 0.85) * 14) * (t > 0.85 ? .7 : 0);
+  if (fl > 0.01) { fx.fillStyle = `rgba(255,245,230,${fl * .55})`; fx.fillRect(0, 0, W, H); }
+}
+
+function scene2(t) {
+  const lt = t - 2.1;
+  bg.fillStyle = C.cream; bg.fillRect(0, 0, W, H);
+  drawSpeedLines(bg, t, "rgba(252,43,0,.22)", 1, -1);
+  drawTicks(bg, t, C.red, C.navy, 0.35, 1);
+
+  fadeUp($("s2-head"), t, 2.22, { x: W / 2, y: 110, r: -3, dist: 30, dur: .35 });
+  const words = [["s2-w0", 2.33, 2.88], ["s2-w1", 2.93, 3.48], ["s2-w2", 3.53, 4.4]];
+  words.forEach(([id, a, b], i) => slam($(id), t, a, { x: W / 2, y: 262, r: -4, from: 1.9, dur: .2, out: b, outDur: .12, dx: -160 }));
+
+  // Reiter galoppiert von links ins Bild und bleibt in Bewegung
+  const pin = easeOutExpo(prog(t, 2.12, 2.75));
+  const gallop = Math.abs(Math.sin(lt * Math.PI * 2.3));
+  const x = lerp(-900, 150, pin) + lt * 22;
+  const y = 335 - gallop * 16;
+  place($("rider"), { x, y, r: -1.5 + gallop * 2.2, s: 1, center: false });
+
+  fx.clearRect(0, 0, W, H);
+  drawDust(fx, t, x + 230, y + 690, pin);
+}
+
+function scene3(t) {
+  bg.fillStyle = C.cream; bg.fillRect(0, 0, W, H);
+  const p = prog(t, 4.3, 6.4);
+  const s = lerp(1.18, 1.02, easeOutCubic(p));
+  const gallop = Math.abs(Math.sin((t - 4.3) * Math.PI * 2.3));
+  place($("lake"), { x: W / 2 + lerp(60, -10, p), y: 520 - gallop * 5, s });
+
+  // Schreibschrift wird "geschrieben" (Clip von links nach rechts)
+  const write = (el, a, dur, x, y, r) => {
+    const q = easeInOutCubic(prog(t, a, a + dur));
+    place(el, { x, y, r, o: q > 0 ? 1 : 0 });
+    el.style.clipPath = `inset(-30% ${100 - q * 100}% -30% -5%)`;
+  };
+  write($("s3-a"), 4.55, .55, W / 2 - 40, 845, -4);
+  write($("s3-b"), 5.0, .6, W / 2 + 30, 965, -4);
+
+  fx.clearRect(0, 0, W, H);
+  drawBrush(fx, easeOutCubic(prog(t, 5.5, 5.85)), W / 2 + 40, 1040, 600, -0.05, "rgba(252,43,0,.9)", 0.12);
+}
+
+function scene4(t) {
+  bg.fillStyle = C.navy; bg.fillRect(0, 0, W, H);
+  drawSpeedLines(bg, t, "rgba(248,243,232,.10)", 1);
+  drawTicks(bg, t, "#2b3c66", C.red, .6);
+  const z = 1 + 0.025 * prog(t, 6.6, 7.8);
+  slam($("s4-a"), t, 6.48, { x: W / 2, y: 330, r: -3, from: 2.6, dur: .22 });
+  slam($("s4-b"), t, 6.73, { x: W / 2, y: 590, r: -3, from: 2.6, dur: .22 });
+  fadeUp($("s4-c"), t, 7.0, { x: W / 2, y: 800, dist: 40, dur: .35 });
+  ["s4-a", "s4-b"].forEach(id => { $(id).style.scale = z; });
+  fx.clearRect(0, 0, W, H);
+}
+
+function scene5(t) {
+  bg.fillStyle = C.cream; bg.fillRect(0, 0, W, H);
+  drawTicks(bg, t, C.red, C.navy, .25);
+  fx.clearRect(0, 0, W, H);
+  const wob = Math.sin(t * 14) * 1.2;
+  // Pinselstrich liegt zwischen Hintergrund und Text -> auf bg zeichnen
+  drawBrush(bg, easeOutCubic(prog(t, 7.86, 8.12)), W / 2, 540, 1080, -0.09, C.red, 1.2);
+  slam($("s5-a"), t, 7.98, { x: W / 2 - 150, y: 470, r: -8 + wob, from: 0.3, dur: .2 });
+  fadeUp($("s5-b"), t, 8.1, { x: W / 2 + 10, y: 612, r: -6 + wob * .6, dist: 30, dur: .25 });
+  fadeUp($("s5-c"), t, 8.3, { x: W / 2, y: 820, dist: 25, dur: .3 });
+}
+
+function scene6(t) {
+  bg.fillStyle = C.cream; bg.fillRect(0, 0, W, H);
+  drawRays(bg, t, C.red, 0.07 * prog(t, 8.8, 9.2));
+  const p = prog(t, 8.86, 9.16);
+  const s = p <= 0 ? .3 : lerp(.3, 1, easeOutBack(p, 1.6));
+  const breathe = 1 + 0.012 * Math.sin((t - 9.2) * 5);
+  place($("logo"), { x: W / 2, y: 395, s: s * breathe, r: lerp(-14, -2, easeOutCubic(p)), o: clamp(p * 3) });
+  slam($("s6-a"), t, 9.12, { x: W / 2, y: 812, r: -3, from: 2.0, dur: .22 });
+  fadeUp($("s6-b"), t, 9.35, { x: W / 2, y: 915, dist: 25, dur: .35 });
+  fx.clearRect(0, 0, W, H);
+}
+
+const RENDER = { s1: scene1, s2: scene2, s3: scene3, s4: scene4, s5: scene5, s6: scene6 };
+
+window.renderAt = function (t) {
+  const sc = SCENES.find(s => t >= s.from && t < s.to) || SCENES[SCENES.length - 1];
+  for (const s of SCENES) $(s.id).style.display = s === sc ? "block" : "none";
+  RENDER[sc.id](t);
+  const sh = shake(t);
+  $("world").style.transform = `translate(${sh.x}px,${sh.y}px) rotate(${sh.r}deg) scale(1.03)`;
+  drawWipe(wp, t);
+};
+
+window.ready = (async () => {
+  await document.fonts.ready;
+  await Promise.all([...document.images].map(i => i.decode()));
+  await Promise.all(["Anton", "Kaushan", "Cinzel", "PlayfairI"].map(f => document.fonts.load(`40px "${f}"`)));
+  return true;
+})();
+
+// Vorschau im Browser (ohne ?render): Endlosschleife in Echtzeit
+if (!location.search.includes("render")) {
+  document.body.classList.add("preview");
+  window.ready.then(() => {
+    const t0 = performance.now();
+    const loop = now => { window.renderAt(((now - t0) / 1000) % DURATION); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  });
+}
+</script>
+</body>
+</html>
